@@ -4,15 +4,16 @@ import hisab.dto.MarketForm;
 import hisab.entity.Market;
 import hisab.repo.MarketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 @Controller
@@ -113,6 +114,31 @@ public class HisabController {
             return mv;
         }
 
+        return mv;
+    }
+
+
+    @GetMapping("/list")
+    public ModelAndView allShoppingList(@RequestParam Map<String,String> params) {
+
+        ModelAndView mv = new ModelAndView("shoppings");
+        Integer pageNumber = params.containsKey("pageNumber")?Integer.parseInt(params.get("pageNumber")):1;
+        Integer pageSize = params.containsKey("pageSize")?Integer.parseInt(params.get("pageSize")):10;
+
+        LocalDate fromDate = params.containsKey("fromDate")?LocalDate.parse(params.get("fromDate")):null;
+        LocalDate toDate = params.containsKey("toDate")?LocalDate.parse(params.get("toDate")):null;
+        String itemName = params.containsKey("itemName")?params.get("itemName"):null;
+
+        Pageable pageable = PageRequest.of(pageNumber-1,pageSize);
+        Page<Market> page = marketRepository.allShoppingList(fromDate,toDate,itemName,pageable);
+
+        Map<String,Object> response = new HashMap<>();
+        response.put("markets",page.getContent());
+        response.put("totalItems",page.getTotalElements());
+        response.put("totalPages",page.getTotalPages());
+        response.put("currentPage",pageNumber);
+        response.put("pageSize",pageSize);
+        mv.addObject("response",response);
         return mv;
     }
 
