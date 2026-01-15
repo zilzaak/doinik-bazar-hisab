@@ -31,8 +31,8 @@ public class HisabController {
             form.getMarkets().addAll(markets);
             form.setDate(markets.get(0).getDate());
         }else{
-            Market m1 = new Market(null, LocalDate.now(), LocalTime.now(),"-",45.50,"-");
-            Market m2 = new Market(null, LocalDate.now(), LocalTime.now(),"-",78.50,"-");
+            Market m1 = new Market(null, LocalDate.now(), LocalTime.now(),"-",0.0,"-");
+            Market m2 = new Market(null, LocalDate.now(), LocalTime.now(),"-",0.0,"-");
             form.getMarkets().add(m1);
             form.getMarkets().add(m2);
             form.setDate(LocalDate.now());
