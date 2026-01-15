@@ -1,5 +1,6 @@
 package hisab.controller;
 
+
 import hisab.dto.MarketForm;
 import hisab.entity.Market;
 import hisab.repo.MarketRepository;
@@ -33,9 +34,7 @@ public class HisabController {
             form.setDate(markets.get(0).getDate());
         }else{
             Market m1 = new Market(null, LocalDate.now(), LocalTime.now(),"-",0.0,"-");
-            Market m2 = new Market(null, LocalDate.now(), LocalTime.now(),"-",0.0,"-");
             form.getMarkets().add(m1);
-            form.getMarkets().add(m2);
             form.setDate(LocalDate.now());
         }
         form.totalPrice=this.totalPrice(form.getMarkets());
@@ -107,6 +106,11 @@ public class HisabController {
 
         if(form.getOperation().equals("datewiseShop")){
             List<Market> markets = marketRepository.findByDate(form.getDate());
+
+            if(markets.size()<1){
+                Market m1 = new Market(null, LocalDate.now(), LocalTime.now(),"-",0.0,"-");
+                markets.add(m1);
+            }
             form.setMarkets(markets);
             form.totalPrice=this.totalPrice(form.getMarkets());
             mv.addObject("marketForm",form);
