@@ -2,6 +2,7 @@ package hisab.controller;
 
 
 import hisab.dto.MarketForm;
+import hisab.dto.SearchForm;
 import hisab.entity.Market;
 import hisab.repo.MarketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,10 +120,9 @@ public class HisabController {
 
     @GetMapping("/list")
     public ModelAndView allShoppingList(@RequestParam Map<String,String> params) {
-
         ModelAndView mv = new ModelAndView("shoppings");
         Integer pageNumber = params.containsKey("pageNumber")?Integer.parseInt(params.get("pageNumber")):1;
-        Integer pageSize = params.containsKey("pageSize")?Integer.parseInt(params.get("pageSize")):10;
+        Integer pageSize = params.containsKey("pageSize")?Integer.parseInt(params.get("pageSize")):200;
 
         LocalDate fromDate = params.containsKey("fromDate")?LocalDate.parse(params.get("fromDate")):null;
         LocalDate toDate = params.containsKey("toDate")?LocalDate.parse(params.get("toDate")):null;
@@ -138,6 +138,8 @@ public class HisabController {
         response.put("currentPage",pageNumber);
         response.put("pageSize",pageSize);
         mv.addObject("response",response);
+        SearchForm sform=new SearchForm(fromDate,toDate,itemName);
+        mv.addObject("sform",sform);
         return mv;
     }
 

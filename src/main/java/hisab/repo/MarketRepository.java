@@ -20,7 +20,8 @@ public interface MarketRepository extends JpaRepository<Market,Long> {
     @Query("select x from Market x where " +
             " ( cast( :fd as date ) is null or cast(x.date as date) >=  cast(:fd as date ) ) " +
             " and ( cast( :td as date ) is null or cast(x.date as date) <=  cast(:td as date ) )  " +
-            " and ( :itemName is null or x.itemName like concat('%' , :itemName , '%')   ) ")
+            " and ( :itemName is null or x.itemName like concat('%' , :itemName , '%')   ) " +
+            " order by x.date asc  ")
     Page<Market> allShoppingList(@Param("fd") LocalDate fd, @Param("td") LocalDate td,
                                  @Param("itemName") String itemName, Pageable pageable);
 }

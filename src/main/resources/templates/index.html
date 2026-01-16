@@ -8,12 +8,15 @@
 <body class="bg-gray-50 min-h-screen">
 
 
-<div class="container mx-auto px-4 py-1">
-    <div class="text-center mb-3">
-        <h2 class="text-gray-600">Add and manage your purchase items</h2>
-    </div>
+<div class="flex flex-col  sm:flex-row justify-between ">
+        <a th:href="@{/list}"  class="px-4 py-2 text-sm font-medium rounded-md ">
+            GO Details Searching..
+        </a>
+</div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+<div class="container mx-auto px-4 py-1">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div class="lg:col-span-2">
             <div class="bg-white rounded-xl shadow-md p-2">
                 <form th:object="${marketForm}" th:action="@{/saveMarkets}" method="post">
