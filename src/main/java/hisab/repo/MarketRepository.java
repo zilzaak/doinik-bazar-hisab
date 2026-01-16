@@ -24,4 +24,16 @@ public interface MarketRepository extends JpaRepository<Market,Long> {
             " order by x.date asc  ")
     Page<Market> allShoppingList(@Param("fd") LocalDate fd, @Param("td") LocalDate td,
                                  @Param("itemName") String itemName, Pageable pageable);
+
+    @Query("select sum(x.itemPrice) from Market x where " +
+            " ( cast( :fd as date ) is null or cast(x.date as date) >=  cast(:fd as date ) ) " +
+            " and ( cast( :td as date ) is null or cast(x.date as date) <=  cast(:td as date ) )  " +
+            " and ( :itemName is null or x.itemName like concat('%' , :itemName , '%')   ) " +
+            " order by x.date asc  ")
+    Double totalPrice(@Param("fd") LocalDate fd, @Param("td") LocalDate td,
+                                 @Param("itemName") String itemName);
+
+    boolean existsByItemNameAndDate(String itemName, LocalDate date);
+
+    boolean existsByItemNameAndDateAndIdNotIn(String itemName, LocalDate date, List<Long> asList);
 }

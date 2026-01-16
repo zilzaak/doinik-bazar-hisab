@@ -6,12 +6,20 @@ import java.time.LocalDate;
 
 public class SearchForm {
 
+    public Double getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(Double totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate fromDate;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate toDate;
     private String itemName;
-
+    private Double totalPrice;
     public SearchForm(LocalDate fromDate, LocalDate toDate, String itemName) {
         this.fromDate = fromDate;
         this.toDate = toDate;

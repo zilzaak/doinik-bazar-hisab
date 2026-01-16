@@ -45,12 +45,13 @@
     </form>
 </div>
 
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-4 py-3">
     <div class="text-center mb-10">
-        <p class="text-gray-600">All Shopping history</p>
+        <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+      <b>Total Items</b>: <span class="font-medium" th:text="${response.markets.size()}"></span> <br/>
+      <b>Total Price:</b>:  <span class="font-medium text-green-600" th:text="${sform.totalPrice} "></span>
+        </div>
     </div>
-
-
 
 
     <div class="bg-white rounded-xl shadow-md overflow-hidden">
@@ -97,19 +98,6 @@
             </table>
         </div>
 
-        <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
-            <div class="flex justify-between items-center">
-                <div class="text-sm text-gray-600">
-                    Total Items: <span class="font-medium" th:text="${response.markets.size()}"></span>
-                </div>
-                <div class="text-sm text-gray-600">
-                    Total Amount:
-                    <span class="font-medium text-green-600">
-
-                        </span>
-                </div>
-            </div>
-        </div>
     </div>
 
     <div class="mt-6 text-center">

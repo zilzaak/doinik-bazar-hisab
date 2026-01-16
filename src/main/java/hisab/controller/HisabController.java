@@ -92,9 +92,40 @@ public class HisabController {
         }
 
         if(form.getOperation().equals("save")){
+
+            StringBuilder errorMessage = new StringBuilder();
+
+            boolean error=false;
+            if(form.getDate()==null){
+                errorMessage.append("Shopping d0ate is missing ; ");
+                error=true;
+            }
             for(Market m : form.getMarkets()){
                 m.setDate(form.getDate());
+                if(m.getId()!=null){
+                    if(marketRepository.existsByItemNameAndDateAndIdNotIn(m.getItemName(),form.getDate(),Arrays.asList(m.getId()))){
+                        errorMessage.append(" ,"+errorMessage+m.getItemName()+" Is already entered in date "+form.getDate());
+                        error=true;
+                        break;
+                    }
+
+                }else{
+                    if(marketRepository.existsByItemNameAndDate(m.getItemName(),form.getDate())){
+                        errorMessage.append(" ,"+errorMessage+m.getItemName()+" Is already entered in date "+form.getDate());
+                        error=true;
+                        break;
+                    }
+                }
+                if(m.getItemName().isBlank()){
+                    error=true;
+                }
              }
+
+            if(error){
+                mv=new ModelAndView("error");
+                mv.addObject("message",errorMessage.toString());
+                return mv;
+            }
             marketRepository.saveAll(form.getMarkets());
             form.totalPrice=this.totalPrice(form.getMarkets());
             mv.addObject("marketForm",form);
@@ -123,14 +154,22 @@ public class HisabController {
         ModelAndView mv = new ModelAndView("shoppings");
         Integer pageNumber = params.containsKey("pageNumber")?Integer.parseInt(params.get("pageNumber")):1;
         Integer pageSize = params.containsKey("pageSize")?Integer.parseInt(params.get("pageSize")):200;
+        LocalDate fromDate = null;
+        LocalDate toDate = null;
+        String itemName = null;
 
-        LocalDate fromDate = params.containsKey("fromDate")?LocalDate.parse(params.get("fromDate")):null;
-        LocalDate toDate = params.containsKey("toDate")?LocalDate.parse(params.get("toDate")):null;
-        String itemName = params.containsKey("itemName")?params.get("itemName"):null;
+        if(params.containsKey("fromDate") && params.get("fromDate").length() > 9 ){
+            fromDate=LocalDate.parse(params.get("fromDate"));
+        }
+        if(params.containsKey("toDate") && params.get("toDate").length() > 9 ){
+            toDate = LocalDate.parse(params.get("toDate"));
+        }
+        if(params.containsKey("itemName") && !params.get("itemName").isBlank()){
+            itemName = params.get("itemName");
+        }
 
         Pageable pageable = PageRequest.of(pageNumber-1,pageSize);
         Page<Market> page = marketRepository.allShoppingList(fromDate,toDate,itemName,pageable);
-
         Map<String,Object> response = new HashMap<>();
         response.put("markets",page.getContent());
         response.put("totalItems",page.getTotalElements());
@@ -139,6 +178,7 @@ public class HisabController {
         response.put("pageSize",pageSize);
         mv.addObject("response",response);
         SearchForm sform=new SearchForm(fromDate,toDate,itemName);
+        sform.setTotalPrice(marketRepository.totalPrice(fromDate,toDate,itemName));
         mv.addObject("sform",sform);
         return mv;
     }
