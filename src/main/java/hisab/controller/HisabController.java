@@ -39,7 +39,6 @@ public class HisabController {
         }
         form.totalPrice=this.totalPrice(form.getMarkets());
         mv.addObject("marketForm",form);
-        mv.addObject("markets",form.getMarkets());
         return mv;
     }
 
@@ -64,7 +63,6 @@ public class HisabController {
             form.getMarkets().add(Integer.parseInt(ind[1]),m2);
             form.totalPrice=this.totalPrice(form.getMarkets());
             mv.addObject("marketForm",form);
-            mv.addObject("markets",form.getMarkets());
             return mv;
         }
 
@@ -89,7 +87,6 @@ public class HisabController {
             }
             form.totalPrice=this.totalPrice(form.getMarkets());
             mv.addObject("marketForm",form);
-            mv.addObject("markets",form.getMarkets());
             return mv;
         }
 
@@ -100,7 +97,6 @@ public class HisabController {
             marketRepository.saveAll(form.getMarkets());
             form.totalPrice=this.totalPrice(form.getMarkets());
             mv.addObject("marketForm",form);
-            mv.addObject("markets",form.getMarkets());
             return mv;
         }
 
@@ -114,7 +110,6 @@ public class HisabController {
             form.setMarkets(markets);
             form.totalPrice=this.totalPrice(form.getMarkets());
             mv.addObject("marketForm",form);
-            mv.addObject("markets",form.getMarkets());
             return mv;
         }
 
