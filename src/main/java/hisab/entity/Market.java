@@ -1,20 +1,12 @@
 package hisab.entity;
 
-
-import jakarta.persistence.*;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 
-@Entity
-@Table
 public class Market {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private LocalTime time;
