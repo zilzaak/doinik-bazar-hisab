@@ -72,9 +72,9 @@ public class ExcelService {
         }
 
         // If no ID or no existing row found, create new row
-        int rowNum = sheet.getLastRowNum() + 1;
+        Integer rowNum = sheet.getLastRowNum() + 1;
         Row row = sheet.createRow(rowNum);
-        Long idValue = (market.getId() != null && market.getId() != 0) ? market.getId() : rowNum;
+        Long idValue = (market.getId() != null && market.getId() != 0) ? market.getId() : rowNum.longValue();
         row.createCell(0).setCellValue(idValue);
         row.createCell(1).setCellValue(market.getItemName() != null ? market.getItemName() : "");
         row.createCell(2).setCellValue(market.getItemPrice() != null ? market.getItemPrice() : 0.0);
@@ -162,15 +162,23 @@ public class ExcelService {
                        }
                    }
 
-                   if(from!=null){
-                      if(xdate.equals(from) || xdate.isAfter(from)){
+                   if(from!=null && to!=null){
+                      if((xdate.equals(from) || xdate.isAfter(from)) && (xdate.equals(to) || xdate.isBefore(to))){
                           allFilterMacthed=true;
                       }else{
                           allFilterMacthed=false;
                       }
                    }
 
-            if(to!=null){
+            if(from!=null && to==null){
+                if(xdate.equals(from) || xdate.isAfter(from)){
+                    allFilterMacthed=true;
+                }else{
+                    allFilterMacthed=false;
+                }
+            }
+
+            if(to!=null && from==null){
                 if(xdate.equals(to) || xdate.isBefore(to)){
                     allFilterMacthed=true;
                 }else{

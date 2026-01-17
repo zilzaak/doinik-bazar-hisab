@@ -26,7 +26,6 @@ public class HisabController {
 
     @GetMapping("/")
     public ModelAndView home() throws IOException {
-
         ModelAndView mv = new ModelAndView("index");
         MarketForm form = new MarketForm();
         List<Market> markets = excelService.readExcelData(null,null,LocalDate.now(),LocalDate.now());
