@@ -1,10 +1,10 @@
 package hisab.controller;
 
-
 import hisab.dto.MarketForm;
 import hisab.dto.SearchForm;
 import hisab.entity.Market;
 import hisab.repo.MarketRepository;
+import hisab.service.ExcelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
@@ -23,6 +24,9 @@ public class HisabController {
 
     @Autowired
     MarketRepository marketRepository;
+
+    @Autowired
+    ExcelService excelService;
 
     @GetMapping("/")
     public ModelAndView home() {
@@ -54,7 +58,7 @@ public class HisabController {
       }
 
     @PostMapping("/saveMarkets")
-    public ModelAndView saveMarkets(@ModelAttribute MarketForm form) {
+    public ModelAndView saveMarkets(@ModelAttribute MarketForm form) throws IOException {
         form.setIndex(form.getMarkets().size()-1);
         ModelAndView mv = new ModelAndView("index");
 
@@ -126,7 +130,10 @@ public class HisabController {
                 mv.addObject("message",errorMessage.toString());
                 return mv;
             }
-            marketRepository.saveAll(form.getMarkets());
+
+           // marketRepository.saveAll(form.getMarkets());\
+            excelService.saveAllInExcell(form.getMarkets());
+
             form.totalPrice=this.totalPrice(form.getMarkets());
             mv.addObject("marketForm",form);
             return mv;
