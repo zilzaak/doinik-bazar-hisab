@@ -38,7 +38,7 @@ public class HisabController {
             form.getMarkets().addAll(markets);
             form.setDate(markets.get(0).getDate());
         }else{
-            Market m1 = new Market(null, LocalDate.now(), LocalTime.now(),"-",0.0,"-");
+            Market m1 = new Market(null,"-",0.0,LocalDate.now());
             form.getMarkets().add(m1);
             form.setDate(LocalDate.now());
         }
@@ -64,7 +64,7 @@ public class HisabController {
 
         if(form.getOperation().contains("add")){
             String ind[] = form.getOperation().split("/");
-            Market m2 = new Market(null, LocalDate.now(), LocalTime.now(),"",0.0,"");
+            Market m2 = new Market(null,"",0.0,LocalDate.now());
             form.getMarkets().add(Integer.parseInt(ind[1]),m2);
             form.totalPrice=this.totalPrice(form.getMarkets());
             mv.addObject("marketForm",form);
@@ -85,8 +85,11 @@ public class HisabController {
                     }
                     i++;
                 }
+
                 if(obj!=null && obj.getId()!=null){
-                    marketRepository.delete(obj);
+                    //marketRepository.delete(obj);
+
+
                 }
                 form.setMarkets(list);
             }
@@ -143,7 +146,7 @@ public class HisabController {
             List<Market> markets = marketRepository.findByDate(form.getDate());
 
             if(markets.size()<1){
-                Market m1 = new Market(null, LocalDate.now(), LocalTime.now(),"-",0.0,"-");
+                Market m1 = new Market(null,"-",0.0,LocalDate.now());
                 markets.add(m1);
             }
             form.setMarkets(markets);
@@ -159,11 +162,19 @@ public class HisabController {
     @GetMapping("/list")
     public ModelAndView allShoppingList(@RequestParam Map<String,String> params) {
         ModelAndView mv = new ModelAndView("shoppings");
-        Integer pageNumber = params.containsKey("pageNumber")?Integer.parseInt(params.get("pageNumber")):1;
-        Integer pageSize = params.containsKey("pageSize")?Integer.parseInt(params.get("pageSize")):200;
+        Integer pageNumber = 1;
+        Integer pageSize = 200;
         LocalDate fromDate = null;
         LocalDate toDate = null;
         String itemName = null;
+
+        if(params.containsKey("pageNumber") && !params.get("pageNumber").isBlank()){
+            pageNumber=Integer.parseInt(params.get("pageNumber"));
+        }
+
+        if(params.containsKey("pageSize") && !params.get("pageSize").isBlank()){
+            pageSize=Integer.parseInt(params.get("pageSize"));
+        }
 
         if(params.containsKey("fromDate") && params.get("fromDate").length() > 9 ){
             fromDate=LocalDate.parse(params.get("fromDate"));
@@ -175,17 +186,22 @@ public class HisabController {
             itemName = params.get("itemName");
         }
 
-        Pageable pageable = PageRequest.of(pageNumber-1,pageSize);
-        Page<Market> page = marketRepository.allShoppingList(fromDate,toDate,itemName,pageable);
+           List<Market>  list = new ArrayList<>();
+            try{
+                list = excelService.readExcelData(null,itemName,fromDate,toDate);
+            }catch (Exception e){
+
+            }
+
         Map<String,Object> response = new HashMap<>();
-        response.put("markets",page.getContent());
-        response.put("totalItems",page.getTotalElements());
-        response.put("totalPages",page.getTotalPages());
+        response.put("markets",list);
+        response.put("totalItems",list.size());
+        response.put("totalPages",list.size()/pageSize);
         response.put("currentPage",pageNumber);
         response.put("pageSize",pageSize);
         mv.addObject("response",response);
         SearchForm sform=new SearchForm(fromDate,toDate,itemName);
-        sform.setTotalPrice(marketRepository.totalPrice(fromDate,toDate,itemName));
+        sform.setTotalPrice(this.totalPrice(list));
         mv.addObject("sform",sform);
         return mv;
     }

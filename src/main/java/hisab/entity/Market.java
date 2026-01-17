@@ -77,14 +77,12 @@ public Market(){
 
 }
 
-    public Market(Long id, LocalDate date, LocalTime time,
-                  String itemName, Double itemPrice, String description) {
+    public Market(Long id, String itemName, Double itemPrice,LocalDate date) {
         this.id = id;
         this.date = (date != null) ? date : LocalDate.now();
-        this.time = (time != null) ? time : LocalTime.now();
         this.itemName = itemName;
         this.itemPrice = itemPrice;
-        this.description = description;
+;
     }
 
 }
