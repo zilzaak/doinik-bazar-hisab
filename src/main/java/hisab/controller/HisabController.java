@@ -3,13 +3,11 @@ package hisab.controller;
 import hisab.dto.MarketForm;
 import hisab.dto.SearchForm;
 import hisab.entity.Market;
-import hisab.repo.MarketRepository;
 import hisab.service.ExcelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.ModelAndView;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
@@ -17,9 +15,6 @@ import java.util.*;
 
 @Controller
 public class HisabController {
-
-    @Autowired
-    MarketRepository marketRepository;
 
     @Autowired
     ExcelService excelService;
