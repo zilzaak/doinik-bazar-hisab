@@ -18,9 +18,8 @@ import java.util.Optional;
 @Service
 public class ExcelService {
 
-    private static final String EXCEL_FILE_PATH = "data/shopping_data.xlsx";
+    private static final String EXCEL_FILE_PATH = "C:\\data/shopping_data.xlsx";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     public void writeToExcel(Market market) throws IOException {
         File file = new File(EXCEL_FILE_PATH);

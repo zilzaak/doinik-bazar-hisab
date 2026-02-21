@@ -11,6 +11,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Controller
@@ -102,6 +103,7 @@ public class HisabController {
            List<Market>  list = new ArrayList<>();
             try{
                 list = excelService.readExcelData(null,itemName,fromDate,toDate);
+                list = list.stream().sorted(Comparator.comparing(Market::getDate).reversed()).collect(Collectors.toList());
             }catch (Exception e){
 
             }
