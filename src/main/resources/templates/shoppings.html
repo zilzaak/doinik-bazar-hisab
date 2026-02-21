@@ -13,24 +13,163 @@
             }
         });
 
-        function resetForm(){
-            document.getElementById("fromDate").value='';
-            document.getElementById("toDate").value='';
-            document.getElementById("itemName").value='';
-            document.querySelector('button[type="submit"]').click();
+        function calcInput(param) {
+            var opstr=document.getElementById("calcDisplay").value;
+            var result=document.getElementById("resultDisplay").value;
 
+            if(opstr===undefined){
+                document.getElementById("calcDisplay").value="";
+                opstr="";
+            }
+            if(result===undefined){
+                document.getElementById("resultDisplay").value="";
+                result="";
+            }
+
+            if(opstr.toString()===""){
+                if(param.toString()==="/" || param.toString()==="+" || param.toString()==="-" || param.toString()==="*"){
+                    return;
+                }else{
+                    document.getElementById('calcDisplay').value=param.toString();
+                }
+            }else{
+                if(param.toString()==="/" || param.toString()==="+" || param.toString()==="-" || param.toString()==="*"){
+                    if(opstr.toString().slice(-1)==="+" || opstr.toString().slice(-1)==="-" ||
+                        opstr.toString().slice(-1)==="/" || opstr.toString().slice(-1)==="*"){
+                        return;
+                    }else{
+                        document.getElementById('calcDisplay').value=opstr+ param.toString();
+                    }
+                }
+                else{
+                    if(opstr.toString().slice(-1)==="+" || opstr.toString().slice(-1)==="-" ||
+                        opstr.toString().slice(-1)==="/" || opstr.toString().slice(-1)==="*"){
+
+                        var lastChar=opstr.toString().slice(-1);
+                        var numb = opstr.slice(0, -1);
+                        if(result===""){
+                            if(lastChar==="+"){
+                                result=Number(numb.toString())+Number(param.toString());
+                            }
+                            if(lastChar==="-"){
+                                result=Number(numb.toString())-Number(param.toString());
+                            }
+                            if(lastChar==="*"){
+                                result=Number(numb.toString())*Number(param.toString());
+                            }
+                            if(lastChar==="/"){
+                                result=Number(numb.toString())/Number(param.toString());
+                            }
+                            document.getElementById('calcDisplay').value=opstr+param.toString();
+                            document.getElementById("resultDisplay").value=result;
+                        }else{
+                            if(lastChar==="+"){
+                                result=Number(result.toString())+Number(param.toString());
+                            }
+                            if(lastChar==="-"){
+                                result=Number(result.toString())-Number(param.toString());
+                            }
+                            if(lastChar==="*"){
+                                result=Number(result.toString())*Number(param.toString());
+                            }
+                            if(lastChar==="/"){
+                                result=Number(result.toString())/Number(param.toString());
+                            }
+                            document.getElementById('calcDisplay').value=opstr+param.toString();
+                            document.getElementById("resultDisplay").value=result;
+
+                        }
+
+                    }else{
+                        if(result===""){
+                            opstr=opstr.toString()+param.toString();
+                            document.getElementById("calcDisplay").value=opstr;
+                        }else{
+                            var numbers = opstr.toString().match(/\d+/g);  // Matches all number sequences
+                            var lastNumber = numbers[numbers.length - 1];
+                            var operators = opstr.toString().match(/[+\-*/]/g);  // Match all operators
+                            var lastOperator = operators[operators.length - 1];
+                            opstr=opstr.toString()+param.toString();
+                            var updatedLastNumber=Number(lastNumber.toString()+param.toString());
+
+
+                            if(lastOperator.toString()==='+'){
+                                result=Number(result.toString())-Number(lastNumber.toString());
+                                result=Number(result.toString())+updatedLastNumber;
+
+                            }
+                            if(lastOperator.toString()==='-'){
+                                result=Number(result.toString())+Number(lastNumber.toString());
+                                result=Number(result.toString())-updatedLastNumber;
+                            }
+                            if(lastOperator.toString()==='*'){
+                                result=Number(result.toString())/Number(lastNumber.toString());
+                                result=Number(result.toString())*updatedLastNumber;
+                            }
+                            if(lastOperator.toString()==='/'){
+                                result=Number(result.toString())*Number(lastNumber.toString());
+                                result=Number(result.toString())/updatedLastNumber;
+                            }
+                            document.getElementById("resultDisplay").value=result;
+                            document.getElementById("calcDisplay").value=opstr;
+                        }
+
+
+                    }
+
+                }
+            }
+        }
+
+
+        function calcClear() {
+            document.getElementById("calcDisplay").value="";
+            document.getElementById("resultDisplay").value="";
+        }
+
+        function calcEquals(){
+            var result = document.getElementById("resultDisplay").value;
+            document.getElementById("calcDisplay").value=result.toString();
+            document.getElementById("resultDisplay").value="";
         }
 
     </script>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
-<div class="flex flex-col  sm:flex-row justify-between ">
-    <div>
-        <a th:href="@{/}"  class="px-4 py-2 text-sm font-medium rounded-md ">
-            GO Home Page
+<div class="flex flex-wrap -mx-2 py-4 px-3 " style="width:70%;">
+    <div class="w-1/2 lg:w-1/5 px-2">
+        <a th:href="@{/}"  class="px-4 py-2 text-sm font-medium rounded-md " >
+            Home Page
         </a>
     </div>
+
+    <div class="w-1/2 lg:w-1/5 px-2">
+        <a th:href="@{/list}"  class="px-4 py-2 text-sm font-medium rounded-md " >
+            Refresh
+        </a>
+    </div>
+
+    <div class="w-1/2 lg:w-1/5 px-2">
+        <a th:href="@{/download/excel}"  class="px-4 py-2 text-sm font-medium rounded-md ">
+            Download excel..
+        </a>
+    </div>
+
+    <div class="w-1/2 lg:w-1/5 px-2 text:left">
+        <a th:href="@{/download/pdf}"  class="px-4 py-2 text-sm font-medium rounded-md ">
+            Download Pdf
+        </a>
+    </div>
+
+    <div class="w-1/2 lg:w-1/5 px-2 text:left">
+            <button type="button" onclick="document.getElementById('calcModal').showModal()"
+                    class="mx-4 px-4 py-1 border border-gray-300 rounded-lg">
+                Calculator
+            </button>
+    </div>
+
+
 </div>
 
 <div class="flex flex-col  sm:flex-row justify-between ">
@@ -58,13 +197,6 @@
                                  focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                 </div>
 
-                <div class="flex items-center" style="padding-left: 12px;" >
-                    <button  id="reset"
-                             onclick="resetForm();"
-                             class="px-6 bg-green-300 text-white font-medium rounded-lg hover:bg-yellow-200 transition-colors duration-200">
-                        Reset
-                    </button>
-                </div>
 <div  class="flex items-center" style="padding-left: 12px;" >
     <button  id="search"
              type="submit"
@@ -140,6 +272,47 @@
     </div>
 
 </div>
+<dialog id="calcModal" class="p-0 rounded-lg shadow-xl w-72">
+    <div class="p-4">
+        <!-- Header with close -->
+        <div class="flex justify-between items-center mb-3">
+            <span class="font-medium">Calculator</span>
+            <button onclick="document.getElementById('calcModal').close()" class="text-xl">&times;</button>
+        </div>
+
+        <!-- Display -->
+        <input type="text" id="calcDisplay" class="w-full mb-3 p-2 border rounded text-right" readonly value="">
+        <!-- Display -->
+        <input type="text" id="resultDisplay" class="w-full mb-3 p-2 border rounded text-right" readonly value="">
+
+        <!-- Buttons grid -->
+        <div class="grid grid-cols-4 gap-2">
+            <!-- Row 1 -->
+            <button onclick="calcInput('7')" class="p-2 border rounded hover:bg-gray-100">7</button>
+            <button onclick="calcInput('8')" class="p-2 border rounded hover:bg-gray-100">8</button>
+            <button onclick="calcInput('9')" class="p-2 border rounded hover:bg-gray-100">9</button>
+            <button onclick="calcInput('/')" class="p-2 border rounded bg-gray-200">/</button>
+
+            <!-- Row 2 -->
+            <button onclick="calcInput('4')" class="p-2 border rounded hover:bg-gray-100">4</button>
+            <button onclick="calcInput('5')" class="p-2 border rounded hover:bg-gray-100">5</button>
+            <button onclick="calcInput('6')" class="p-2 border rounded hover:bg-gray-100">6</button>
+            <button onclick="calcInput('*')" class="p-2 border rounded bg-gray-200">×</button>
+
+            <!-- Row 3 -->
+            <button onclick="calcInput('1')" class="p-2 border rounded hover:bg-gray-100">1</button>
+            <button onclick="calcInput('2')" class="p-2 border rounded hover:bg-gray-100">2</button>
+            <button onclick="calcInput('3')" class="p-2 border rounded hover:bg-gray-100">3</button>
+            <button onclick="calcInput('-')" class="p-2 border rounded bg-gray-200">-</button>
+
+            <!-- Row 4 -->
+            <button onclick="calcInput('0')" class="p-2 border rounded hover:bg-gray-100">0</button>
+            <button onclick="calcClear()" class="p-2 border rounded bg-red-200">C</button>
+            <button onclick="calcEquals()" class="p-2 border rounded bg-green-200">=</button>
+            <button onclick="calcInput('+')" class="p-2 border rounded bg-gray-200">+</button>
+        </div>
+    </div>
+</dialog>
 
 </body>
 </html>

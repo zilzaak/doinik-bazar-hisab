@@ -1,14 +1,19 @@
 package hisab.controller;
 
+import com.itextpdf.text.DocumentException;
 import hisab.dto.MarketForm;
 import hisab.dto.SearchForm;
 import hisab.entity.Market;
 import hisab.service.ExcelService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.ModelAndView;
 import java.io.IOException;
+import java.net.http.HttpResponse;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -72,6 +77,53 @@ public class HisabController {
         return mv;
     }
 
+
+
+
+    @GetMapping("/download/pdf")
+    public void exportToPdf(HttpServletResponse response) throws IOException, DocumentException {
+        response.setContentType("application/pdf");
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+        String currentDateTime = dateFormatter.format(new Date());
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=all_items_" + currentDateTime + ".pdf";
+        response.setHeader(headerKey, headerValue);
+
+        List<Market> list = new ArrayList<>();
+        try {
+            list = excelService.readExcelData(null, null, null, LocalDate.now());
+            list = list.stream()
+                    .sorted(Comparator.comparing(Market::getDate).reversed())
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            // Log error if needed
+        }
+
+        Double total = excelService.totalPrice(list);
+        UserPdfExporter pdfExporter = new UserPdfExporter(list, total);
+        pdfExporter.export(response);
+    }
+
+
+    @GetMapping("/download/excel")
+    public void exportToExcel(HttpServletResponse response) throws IOException {
+        response.setContentType("application/octet-stream");
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+        String currentDateTime = dateFormatter.format(new Date());
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=all_items_" + currentDateTime + ".xlsx";
+        response.setHeader(headerKey, headerValue);
+        List<Market>  list = new ArrayList<>();
+        try{
+            list = excelService.readExcelData(null,null,null,LocalDate.now());
+            list = list.stream().sorted(Comparator.comparing(Market::getDate).reversed()).collect(Collectors.toList());
+        }catch (Exception e){
+
+        }
+        Double total = excelService.totalPrice(list);
+        UserExcelExplorer excelExporter = new UserExcelExplorer(list);
+        excelExporter.export(response,total);
+    }
 
     @GetMapping("/list")
     public ModelAndView allShoppingList(@RequestParam Map<String,String> params) {
