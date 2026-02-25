@@ -6,14 +6,18 @@ import java.time.LocalTime;
 
 
 public class Market {
-
     private Long id;
-
     private LocalTime time;
-
     private String itemName;
     private Double itemPrice;
     private String description;
+    private String day;
+    public String getDay() {
+        return day;
+    }
+    public void setDay(String day) {
+        this.day = day;
+    }
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate date;
 

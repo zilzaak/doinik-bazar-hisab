@@ -4,6 +4,7 @@ import com.itextpdf.text.DocumentException;
 import hisab.dto.MarketForm;
 import hisab.dto.SearchForm;
 import hisab.entity.Market;
+import hisab.service.EmailService;
 import hisab.service.ExcelService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ public class HisabController {
 
     @Autowired
     ExcelService excelService;
+
+    @Autowired
+    EmailService emailService;
 
     @GetMapping("/")
     public ModelAndView home() throws IOException {
@@ -81,48 +85,106 @@ public class HisabController {
 
 
     @GetMapping("/download/pdf")
-    public void exportToPdf(HttpServletResponse response) throws IOException, DocumentException {
-        response.setContentType("application/pdf");
-        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
-        String currentDateTime = dateFormatter.format(new Date());
-        String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=all_items_" + currentDateTime + ".pdf";
-        response.setHeader(headerKey, headerValue);
+    public void exportToPdf(@RequestParam Map<String,String> params , HttpServletResponse response) throws IOException, DocumentException {
+        Integer pageNumber = 1;
+        Integer pageSize = 200;
+        LocalDate fromDate = null;
+        LocalDate toDate = null;
+        String itemName = null;
+
+        if(params.containsKey("pageNumber") && !params.get("pageNumber").isBlank()){
+            pageNumber=Integer.parseInt(params.get("pageNumber"));
+        }
+
+        if(params.containsKey("pageSize") && !params.get("pageSize").isBlank()){
+            pageSize=Integer.parseInt(params.get("pageSize"));
+        }
+
+        if(params.containsKey("fromDate") && params.get("fromDate").length() > 9 ){
+            fromDate=LocalDate.parse(params.get("fromDate"));
+        }
+        if(params.containsKey("toDate") && params.get("toDate").length() > 9 ){
+            toDate = LocalDate.parse(params.get("toDate"));
+        }
+        if(params.containsKey("itemName") && !params.get("itemName").isBlank()){
+            itemName = params.get("itemName");
+        }
 
         List<Market> list = new ArrayList<>();
         try {
-            list = excelService.readExcelData(null, null, null, LocalDate.now());
-            list = list.stream()
-                    .sorted(Comparator.comparing(Market::getDate).reversed())
-                    .collect(Collectors.toList());
+            list = excelService.readExcelData(null,itemName,fromDate,toDate);
+            list = list.stream().sorted(Comparator.comparing(Market::getDate).reversed()).collect(Collectors.toList());
         } catch (Exception e) {
-            // Log error if needed
         }
-
+;
         Double total = excelService.totalPrice(list);
         UserPdfExporter pdfExporter = new UserPdfExporter(list, total);
+        String fileName=pdfExporter.getFileName(list) ;
+        response.setContentType("application/pdf");
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename="+fileName;
+        response.setHeader(headerKey, headerValue);
         pdfExporter.export(response);
+        try{
+            byte[] pdfBytes = pdfExporter.exportToByteArray();
+            List<String> recipients = Arrays.asList("jebafariha102@gmail.com","jebafariha705@gmail.com");
+            emailService.sendPdf(pdfBytes,recipients);
+        } catch (Exception e) {
+        }
+
     }
 
 
     @GetMapping("/download/excel")
-    public void exportToExcel(HttpServletResponse response) throws IOException {
-        response.setContentType("application/octet-stream");
-        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
-        String currentDateTime = dateFormatter.format(new Date());
-        String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=all_items_" + currentDateTime + ".xlsx";
-        response.setHeader(headerKey, headerValue);
+    public void exportToExcel(HttpServletResponse response, @RequestParam Map<String,String> params) throws IOException {
         List<Market>  list = new ArrayList<>();
+
+        Integer pageNumber = 1;
+        Integer pageSize = 200;
+        LocalDate fromDate = null;
+        LocalDate toDate = null;
+        String itemName = null;
+
+        if(params.containsKey("pageNumber") && !params.get("pageNumber").isBlank()){
+            pageNumber=Integer.parseInt(params.get("pageNumber"));
+        }
+
+        if(params.containsKey("pageSize") && !params.get("pageSize").isBlank()){
+            pageSize=Integer.parseInt(params.get("pageSize"));
+        }
+
+        if(params.containsKey("fromDate") && params.get("fromDate").length() > 9 ){
+            fromDate=LocalDate.parse(params.get("fromDate"));
+        }
+        if(params.containsKey("toDate") && params.get("toDate").length() > 9 ){
+            toDate = LocalDate.parse(params.get("toDate"));
+        }
+        if(params.containsKey("itemName") && !params.get("itemName").isBlank()){
+            itemName = params.get("itemName");
+        }
+
         try{
-            list = excelService.readExcelData(null,null,null,LocalDate.now());
+            list = excelService.readExcelData(null,itemName,fromDate,toDate);
             list = list.stream().sorted(Comparator.comparing(Market::getDate).reversed()).collect(Collectors.toList());
         }catch (Exception e){
-
         }
+
         Double total = excelService.totalPrice(list);
         UserExcelExplorer excelExporter = new UserExcelExplorer(list);
+
+        response.setContentType("application/octet-stream");
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename="+excelExporter.getFileName(list);
+        response.setHeader(headerKey, headerValue);
         excelExporter.export(response,total);
+        try {
+            List<String> recipients = List.of("jebafariha102@gmail.com", "jebafariha705@gmail.com"); // Add your recipients
+            emailService.sendExcelReportEmail(recipients,"Shopping Summary Report", "Shopping summary report in excel format ", list, total);
+            System.out.println("Excel report emailed successfully!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Failed to send Excel report via email: " + e.getMessage());
+        }
     }
 
     @GetMapping("/list")
@@ -151,13 +213,11 @@ public class HisabController {
         if(params.containsKey("itemName") && !params.get("itemName").isBlank()){
             itemName = params.get("itemName");
         }
-
            List<Market>  list = new ArrayList<>();
             try{
                 list = excelService.readExcelData(null,itemName,fromDate,toDate);
                 list = list.stream().sorted(Comparator.comparing(Market::getDate).reversed()).collect(Collectors.toList());
             }catch (Exception e){
-
             }
 
         Map<String,Object> response = new HashMap<>();
@@ -172,6 +232,4 @@ public class HisabController {
         mv.addObject("sform",sform);
         return mv;
     }
-
-
 }

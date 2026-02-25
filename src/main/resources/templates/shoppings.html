@@ -151,14 +151,24 @@
     </div>
 
     <div class="w-1/2 lg:w-1/5 px-2">
-        <a th:href="@{/download/excel}"  class="px-4 py-2 text-sm font-medium rounded-md ">
+        <a th:href="@{/download/excel(
+        fromDate=${sform.fromDate},
+        toDate=${sform.toDate},
+        itemName=${sform.itemName}
+    )}"
+           class="px-4 py-2 text-sm font-medium rounded-md">
             Download excel..
         </a>
     </div>
 
     <div class="w-1/2 lg:w-1/5 px-2 text:left">
-        <a th:href="@{/download/pdf}"  class="px-4 py-2 text-sm font-medium rounded-md ">
-            Download Pdf
+        <a th:href="@{/download/pdf(
+        fromDate=${sform.fromDate},
+        toDate=${sform.toDate},
+        itemName=${sform.itemName}
+    )}"
+           class="px-4 py-2 text-sm font-medium rounded-md">
+            Download Pdf..
         </a>
     </div>
 
@@ -224,18 +234,23 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-100">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    <th class="px-6 py-3 text-left text-xs font-medium
+                    text-gray-700 uppercase tracking-wider">
                         SL
                     </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700
+                    uppercase tracking-wider">
+                        Date
+                    </th>
+                    <th  class="px-6 py-3 text-left text-xs font-medium text-gray-700
+                    uppercase tracking-wider" >Day </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                         Item Name
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                         Price
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                        Date
-                    </th>
+
                 </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -243,6 +258,14 @@
                     class="hover:bg-gray-50 transition-colors duration-150">
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="text-gray-700 font-medium" th:text="${rowStat.index + 1}"></span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-sm text-gray-600"
+                                      th:text="${#temporals.format(market.date, 'MMM dd, yyyy')}">
+                                </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm font-medium text-gray-900" th:text="${market.day}"></div>
                     </td>
                     <td class="px-6 py-4">
                         <div class="text-sm font-medium text-gray-900" th:text="${market.itemName}"></div>
@@ -252,11 +275,7 @@
                                     <span th:text="${#numbers.formatDecimal(market.itemPrice, 1, 2)}"></span>tk
                                 </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="text-sm text-gray-600"
-                                      th:text="${#temporals.format(market.date, 'MMM dd, yyyy')}">
-                                </span>
-                    </td>
+
                 </tr>
 
                 </tbody>

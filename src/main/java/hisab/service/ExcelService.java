@@ -151,56 +151,54 @@ public class ExcelService {
                    Double xprice = Double.parseDouble(row.getCell(2).toString());
                    LocalDate xdate = LocalDate.parse(row.getCell(3).toString());
 
-                   boolean allFilterMacthed=false;
+                   boolean idMatched=true;
+                   boolean dateMatched=true;
+                   boolean nameMatched=true;
+
                    Market m=new Market(xid,xname,xprice,xdate);
+                   m.setDay(xdate.getDayOfWeek().name());
                    if(id!=null){
                        if(id.equals(xid)){
-                           allFilterMacthed=true;
+                           idMatched=true;
                        }else{
-                           allFilterMacthed=false;
+                           idMatched=false;
                        }
                    }
 
                    if(from!=null && to!=null){
-                      if((xdate.equals(from) || xdate.isAfter(from)) && (xdate.equals(to) || xdate.isBefore(to))){
-                          allFilterMacthed=true;
+                   if((xdate.equals(from) || xdate.isAfter(from)) && (xdate.equals(to) || xdate.isBefore(to))){
+                          dateMatched=true;
                       }else{
-                          allFilterMacthed=false;
+                          dateMatched=false;
                       }
                    }
+                   else if(from!=null && to==null){
+                    if(xdate.equals(from) || xdate.isAfter(from)){
+                        dateMatched=true;
+                        }else{
+                         dateMatched=false;
+                           }
+                     }
 
-            if(from!=null && to==null){
-                if(xdate.equals(from) || xdate.isAfter(from)){
-                    allFilterMacthed=true;
-                }else{
-                    allFilterMacthed=false;
-                }
-            }
+                 else if(to!=null && from==null){
+                       if(xdate.equals(to) || xdate.isBefore(to)){
+                            dateMatched=true;
+                        }else{
+                            dateMatched=false;
+                            }
+                                               }
 
-            if(to!=null && from==null){
-                if(xdate.equals(to) || xdate.isBefore(to)){
-                    allFilterMacthed=true;
-                }else{
-                    allFilterMacthed=false;
-                }
-            }
 
             if(name!=null && !name.isBlank()){
                if(xname.toLowerCase().contains(name.toLowerCase())){
-                   allFilterMacthed=true;
+                   nameMatched=true;
                }else{
-                   allFilterMacthed=false;
+                   nameMatched=false;
                }
             }
-
-            if(name==null && id==null && from==null && to==null){
-                allFilterMacthed=true;
-            }
-
-            if(allFilterMacthed){
+            if(idMatched && dateMatched && nameMatched){
                 list.add(m);
             }
-
         }
 
         workbook.close();

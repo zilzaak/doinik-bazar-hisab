@@ -18,7 +18,6 @@ public class MarketForm {
     }
 
     private String operation;
-
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate date;
 
