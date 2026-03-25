@@ -33,7 +33,7 @@ public class HisabController {
     public ModelAndView home() throws IOException {
         ModelAndView mv = new ModelAndView("index");
         MarketForm form = new MarketForm();
-        List<Market> markets = excelService.readExcelData(null,null,LocalDate.now(),LocalDate.now());
+        List<Market> markets = excelService.readExcelData(null,null,LocalDate.now(),LocalDate.now(),null);
         if(markets.size()>0){
             form.getMarkets().addAll(markets);
             form.setDate(markets.get(0).getDate());
@@ -67,7 +67,7 @@ public class HisabController {
         }
 
         if(form.getOperation().equals("datewiseShop")){
-            List<Market> markets =  excelService.readExcelData(null,null,form.getDate(),form.getDate());
+            List<Market> markets =  excelService.readExcelData(null,null,form.getDate(),form.getDate(),null);
             if(markets.size()<1){
                 Market m1 = new Market(null,"-",0.0,LocalDate.now());
                 markets.add(m1);
@@ -112,7 +112,7 @@ public class HisabController {
 
         List<Market> list = new ArrayList<>();
         try {
-            list = excelService.readExcelData(null,itemName,fromDate,toDate);
+            list = excelService.readExcelData(null,itemName,fromDate,toDate,null);
             list = list.stream().sorted(Comparator.comparing(Market::getDate).reversed()).collect(Collectors.toList());
         } catch (Exception e) {
         }
@@ -164,7 +164,7 @@ public class HisabController {
         }
 
         try{
-            list = excelService.readExcelData(null,itemName,fromDate,toDate);
+            list = excelService.readExcelData(null,itemName,fromDate,toDate,null);
             list = list.stream().sorted(Comparator.comparing(Market::getDate).reversed()).collect(Collectors.toList());
         }catch (Exception e){
         }
@@ -195,6 +195,7 @@ public class HisabController {
         LocalDate fromDate = null;
         LocalDate toDate = null;
         String itemName = null;
+        String itemCategory = null; //utility bill ,
 
         if(params.containsKey("pageNumber") && !params.get("pageNumber").isBlank()){
             pageNumber=Integer.parseInt(params.get("pageNumber"));
@@ -213,9 +214,14 @@ public class HisabController {
         if(params.containsKey("itemName") && !params.get("itemName").isBlank()){
             itemName = params.get("itemName");
         }
+
+        if(params.containsKey("itemCat") && !params.get("itemCat").isBlank()){
+            itemCategory=params.get("itemCat");
+        }
+
            List<Market>  list = new ArrayList<>();
             try{
-                list = excelService.readExcelData(null,itemName,fromDate,toDate);
+                list = excelService.readExcelData(null,itemName,fromDate,toDate,itemCategory);
                 list = list.stream().sorted(Comparator.comparing(Market::getDate).reversed()).collect(Collectors.toList());
             }catch (Exception e){
             }

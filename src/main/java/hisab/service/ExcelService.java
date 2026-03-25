@@ -4,6 +4,7 @@ import hisab.dto.MarketForm;
 import hisab.entity.Market;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -18,6 +19,8 @@ import java.util.Optional;
 @Service
 public class ExcelService {
 
+    @Autowired
+    private ItemCategoryService categoryService;
     private static final String EXCEL_FILE_PATH = "C:\\data/shopping_data.xlsx";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -130,7 +133,7 @@ public class ExcelService {
 
 
 
-    public List<Market> readExcelData(Long id , String name , LocalDate from , LocalDate to) throws IOException {
+    public List<Market> readExcelData(Long id , String name , LocalDate from , LocalDate to,String itemCat) throws IOException {
         File file = new File(EXCEL_FILE_PATH);
         if (!file.exists()) {
             System.out.println("Excel file does not exist yet.");
@@ -154,6 +157,7 @@ public class ExcelService {
                    boolean idMatched=true;
                    boolean dateMatched=true;
                    boolean nameMatched=true;
+                   boolean itemCatMatched=true;
 
                    Market m=new Market(xid,xname,xprice,xdate);
                    m.setDay(xdate.getDayOfWeek().name());
@@ -196,7 +200,16 @@ public class ExcelService {
                    nameMatched=false;
                }
             }
-            if(idMatched && dateMatched && nameMatched){
+
+            if(itemCat!=null && !itemCat.isBlank()){
+                if(categoryService.isItemUnderSearchedCategory(xname,itemCat)){
+                    itemCatMatched=true;
+                }else{
+                    itemCatMatched=false;
+                }
+            }
+
+            if(idMatched && dateMatched && nameMatched && itemCatMatched){
                 list.add(m);
             }
         }
@@ -220,18 +233,17 @@ public class ExcelService {
         boolean dataExist=false;
         for (Row row : sheet) {
             if (row.getRowNum() == 0) continue;
-            Double temp =  Double.parseDouble(row.getCell(0).toString());
-            Long xid=temp.longValue();
-            String xname = row.getCell(1).toString();
-            LocalDate xdate = LocalDate.parse(row.getCell(3).toString());
+            Long dbId=((Double)(Double.parseDouble(row.getCell(0).toString()))).longValue();
+            String dbName = row.getCell(1).toString();
+            LocalDate dbDate = LocalDate.parse(row.getCell(3).toString());
 
             if(id==null){
-                if(xdate.equals(date) && xname.equals(name)){
+                if(dbDate.equals(date) && dbName.equals(name)){
                     dataExist=true;
                     break;
                 }
             }else{
-                if(!id.equals(xid) && xdate.equals(date) && xname.equals(name)){
+                if(!id.equals(dbId) && dbDate.equals(date) && dbName.equals(name)){
                     dataExist=true;
                     break;
                 }
@@ -339,19 +351,12 @@ public class ExcelService {
 
         for(Market m : form.getMarkets()){
             m.setDate(form.getDate());
-            if(m.getId()!=null){
-                if(this.existsByItemNameAndDateAndIdNotIn(m.getItemName(),form.getDate(), m.getId())){
+            if(this.existsByItemNameAndDateAndIdNotIn(m.getItemName(),form.getDate(), m.getId())){
                     errorMessage.append(" ,"+errorMessage+m.getItemName()+" Is already entered in date "+form.getDate());
                     error=true;
                     break;
                 }
-            }else{
-                if(this.existsByItemNameAndDateAndIdNotIn(m.getItemName(),form.getDate(),null)){
-                    errorMessage.append(" ,"+errorMessage+m.getItemName()+" Is already entered in date "+form.getDate());
-                    error=true;
-                    break;
-                }
-            }
+
             if(m.getItemName().isBlank()){
                 error=true;
             }

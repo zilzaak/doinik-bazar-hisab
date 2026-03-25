@@ -19,11 +19,20 @@ public class SearchForm {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate toDate;
     private String itemName;
+    private String itemCat;
     private Double totalPrice;
     public SearchForm(LocalDate fromDate, LocalDate toDate, String itemName) {
         this.fromDate = fromDate;
         this.toDate = toDate;
         this.itemName = itemName;
+    }
+
+    public String getItemCat() {
+        return itemCat;
+    }
+
+    public void setItemCat(String itemCat) {
+        this.itemCat = itemCat;
     }
 
     public LocalDate getFromDate() {

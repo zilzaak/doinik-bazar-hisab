@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Shopping History</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+<!--    <script src="https://cdn.tailwindcss.com"></script>-->
+    <link rel="stylesheet" th:href="@{tailwind.css}">
+    <!--    <link rel="stylesheet" th:href="@{/webjars/tailwindcss/tailwind.min.css}">-->
     <script type="text/javascript">
 
         document.addEventListener('keypress', function(event) {
@@ -154,7 +156,8 @@
         <a th:href="@{/download/excel(
         fromDate=${sform.fromDate},
         toDate=${sform.toDate},
-        itemName=${sform.itemName}
+        itemName=${sform.itemName},
+        itemCat=${sform.itemCat}
     )}"
            class="px-4 py-2 text-sm font-medium rounded-md">
             Download excel..
@@ -165,7 +168,8 @@
         <a th:href="@{/download/pdf(
         fromDate=${sform.fromDate},
         toDate=${sform.toDate},
-        itemName=${sform.itemName}
+        itemName=${sform.itemName},
+        itemCat=${sform.itemCat}
     )}"
            class="px-4 py-2 text-sm font-medium rounded-md">
             Download Pdf..
@@ -200,12 +204,23 @@
                                  focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                 </div>
 
-
                 <div class="flex items-center" style="padding-left:8px;">
                     <span class="text-gray-700 font-medium mr-3">Item Name :</span>
                     <input id="itemName" type="text" th:field="*{itemName}"  class="px-4 py-1 border border-gray-300 rounded-lg focus:ring-2
                                  focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                 </div>
+
+                    Category
+                    <select  id="itemCat" th:field="*{itemCat}" >
+                        <option  value=""  selected > -- </option>
+                        <option  value="Food"> Food </option>
+                        <option  value="Fatiha"> Fatiha </option>
+                        <option  value="Outfit"> Outfit </option>
+                        <option  value="Utility"> Utility </option>
+                        <option  value="Transport"> Transport</option>
+                        <option  value="Others"> Other </option>
+                    </select>
+
 
 <div  class="flex items-center" style="padding-left: 12px;" >
     <button  id="search"
