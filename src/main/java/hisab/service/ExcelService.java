@@ -1,7 +1,11 @@
 package hisab.service;
 
+import com.itextpdf.text.DocumentException;
+import hisab.config.GoogleDriveBackupService;
+import hisab.controller.UserPdfExporter;
 import hisab.dto.MarketForm;
 import hisab.entity.Market;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,20 +15,19 @@ import org.springframework.web.servlet.ModelAndView;
 import java.io.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ExcelService {
-
+    @Autowired
+    private GoogleDriveBackupService backupService;
     @Autowired
     private ItemCategoryService categoryService;
     private static final String EXCEL_FILE_PATH = "C:\\data/shopping_data.xlsx";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public void writeToExcel(Market market) throws IOException {
+        // If market has a non-null ID, try to find and update existing row
         File file = new File(EXCEL_FILE_PATH);
         Workbook workbook;
         Sheet sheet;
@@ -51,7 +54,6 @@ public class ExcelService {
             }
         }
 
-        // If market has a non-null ID, try to find and update existing row
         if (market.getId() != null) {
             boolean updated = false;
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
@@ -61,7 +63,6 @@ public class ExcelService {
                         if (xid.longValue() == market.getId()) {
                             setUpDatedData(row, market);
                             updated = true;
-                            System.out.println("Updated existing row with ID: " + market.getId());
                             break;
                         }
                 }
@@ -256,7 +257,8 @@ public class ExcelService {
     }
 
 
-    public void removeRowById(Long id) throws IOException {
+    public List<Market> removeRowById(Long id) throws IOException {
+        List<Market> latestList = new ArrayList<>();
         File file = new File(EXCEL_FILE_PATH);
         FileInputStream fis = new FileInputStream(file);
         Workbook workbook = new XSSFWorkbook(fis);
@@ -264,12 +266,19 @@ public class ExcelService {
         int rowToRemove = -1;
         for (Row row : sheet) {
             if (row.getRowNum() == 0) continue; // Skip header if needed
-            Cell cell = row.getCell(0);
-            if (cell != null) {
-                Double idcell = Double.parseDouble(cell.toString());
+            Cell cellId = row.getCell(0);
+            String name = row.getCell(1).toString();
+            Double price = Double.parseDouble(row.getCell(2).toString());
+            LocalDate date = LocalDate.parse(row.getCell(3).toString());
+
+            if (cellId != null) {
+                Double idcell = Double.parseDouble(cellId.toString());
                 if (id.equals(idcell.longValue())) {
                     rowToRemove = row.getRowNum();
                     break;
+                }else{
+                    Market m = new Market(idcell.longValue(),name,price,date);
+                    latestList.add(m);
                 }
             }
         }
@@ -287,6 +296,7 @@ public class ExcelService {
         workbook.close();
         fis.close();
         fos.close();
+        return latestList;
     }
 
 
@@ -329,7 +339,12 @@ public class ExcelService {
             }
 
             if(obj!=null && obj.getId()!=null){
-                this.removeRowById(obj.getId());
+                List<Market> latestList = this.removeRowById(obj.getId());
+                try{
+                    this.keepFileBackupToDrive(latestList);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
             form.setMarkets(list);
         }
@@ -338,6 +353,21 @@ public class ExcelService {
         return mv;
     }
 
+    public void keepFileBackupToDrive(List<Market> list) throws DocumentException, IOException {
+        Double total = this.totalPrice(list);
+        UserPdfExporter pdfExporter = new UserPdfExporter(list, total);
+        byte[] pdfBytes=pdfExporter.exportToByteArray();
+        try{
+            this.backupService.syncPdfToDrive(1L,pdfBytes);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        try{
+            this.backupService.syncPdfToDrive(2L,pdfBytes);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 
     public ModelAndView saveFormDataInExcell(MarketForm form) throws IOException {
@@ -371,9 +401,16 @@ public class ExcelService {
         for(Market m : form.getMarkets()){
             this.writeToExcel(m);
         }
-
         form.totalPrice=this.totalPrice(form.getMarkets());
+        try{
+          List<Market> list = this.readExcelData(null,null,null,null,null);
+          this.keepFileBackupToDrive(list);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         mv.addObject("marketForm",form);
         return mv;
     }
+
 }
