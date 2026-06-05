@@ -18,7 +18,7 @@ public class GoogleDriveConfig {
     public Drive driveService() throws Exception {
 
         GoogleCredentials credentials = GoogleCredentials
-                .fromStream(new ClassPathResource("drive-service-account-key.json").getInputStream())
+                .fromStream(new ClassPathResource("drive-service-account-key.txt").getInputStream())
                 .createScoped(Collections.singletonList("https://www.googleapis.com/auth/drive"));
 
         return new Drive.Builder(
