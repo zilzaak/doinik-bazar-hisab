@@ -42,7 +42,7 @@ public class ExcelService {
             workbook = new XSSFWorkbook();
             sheet = workbook.createSheet("Shopping Data");
             Row headerRow = sheet.createRow(0);
-            String[] columns = {"id", "Product Name", "Price", "Date"};
+            String[] columns = {"id", "Product Name", "Price", "Date","Item Category"};
             CellStyle headerStyle = workbook.createCellStyle();
             Font headerFont = workbook.createFont();
             headerFont.setBold(true);
@@ -86,9 +86,11 @@ public class ExcelService {
         } else {
             row.createCell(3).setCellValue(LocalDate.now().format(DATE_FORMATTER));
         }
+        row.createCell(4).setCellValue(market.getItemType() != null ? market.getItemType() : "--");
+
         System.out.println("Created new row with ID: " + idValue);
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 5; i++) {
             sheet.autoSizeColumn(i);
         }
         saveWorkbook(workbook, file);
@@ -152,6 +154,7 @@ public class ExcelService {
                    Double temp =  Double.parseDouble(row.getCell(0).toString());
                    Long xid=temp.longValue();
                    String xname = row.getCell(1).toString();
+                   String xtype = row.getCell(4)!=null?row.getCell(4).toString():null;
                    Double xprice = Double.parseDouble(row.getCell(2).toString());
                    LocalDate xdate = LocalDate.parse(row.getCell(3).toString());
 
@@ -203,7 +206,7 @@ public class ExcelService {
             }
 
             if(itemCat!=null && !itemCat.isBlank()){
-                if(categoryService.isItemUnderSearchedCategory(xname,itemCat)){
+                if(itemCat.equals(xtype)){
                     itemCatMatched=true;
                 }else{
                     itemCatMatched=false;
@@ -379,36 +382,44 @@ public class ExcelService {
             error=true;
         }
 
+        List<Market> validList = new ArrayList<>();
         for(Market m : form.getMarkets()){
             m.setDate(form.getDate());
             if(this.existsByItemNameAndDateAndIdNotIn(m.getItemName(),form.getDate(), m.getId())){
                     errorMessage.append(" ,"+errorMessage+m.getItemName()+" Is already entered in date "+form.getDate());
-                    error=true;
-                    break;
+                   if(form.getTotalPrice()!=null) {
+                       form.setTotalPrice(form.getTotalPrice() - m.getItemPrice());
+                   }
+                    continue;
                 }
 
             if(m.getItemName().isBlank()){
                 error=true;
+                if(form.getTotalPrice()!=null){
+                    form.setTotalPrice(form.getTotalPrice()-m.getItemPrice());
+                }
+                continue;
             }
+            validList.add(m);
         }
 
-        if(error){
+/*        if(error){
             mv=new ModelAndView("error");
             mv.addObject("message",errorMessage.toString());
             return mv;
-        }
+        }*/
 
-        for(Market m : form.getMarkets()){
+        for(Market m : validList){
             this.writeToExcel(m);
         }
-        form.totalPrice=this.totalPrice(form.getMarkets());
+        form.totalPrice=this.totalPrice(validList);
         try{
           List<Market> list = this.readExcelData(null,null,null,null,null);
           this.keepFileBackupToDrive(list);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
+        form.setMarkets(validList);
         mv.addObject("marketForm",form);
         return mv;
     }

@@ -10,6 +10,7 @@ public class Market {
     private LocalTime time;
     private String itemName;
     private Double itemPrice;
+    private String itemType;
     private String description;
     private String day;
     public String getDay() {
@@ -27,6 +28,14 @@ public class Market {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getItemType() {
+        return itemType;
+    }
+
+    public void setItemType(String itemType) {
+        this.itemType = itemType;
     }
 
     public LocalDate getDate() {
