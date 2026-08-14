@@ -21,6 +21,10 @@ public class SearchForm {
     private String itemName;
     private String itemCat;
     private Double totalPrice;
+    private Integer pageNumber;
+    private Integer pageSize;
+    private Integer totalPages;
+    private Integer totalItems;
     public SearchForm(LocalDate fromDate, LocalDate toDate, String itemName) {
         this.fromDate = fromDate;
         this.toDate = toDate;
@@ -33,6 +37,38 @@ public class SearchForm {
 
     public void setItemCat(String itemCat) {
         this.itemCat = itemCat;
+    }
+
+    public Integer getPageNumber() {
+        return pageNumber;
+    }
+
+    public void setPageNumber(Integer pageNumber) {
+        this.pageNumber = pageNumber;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public Integer getTotalPages() {
+        return totalPages;
+    }
+
+    public void setTotalPages(Integer totalPages) {
+        this.totalPages = totalPages;
+    }
+
+    public Integer getTotalItems() {
+        return totalItems;
+    }
+
+    public void setTotalItems(Integer totalItems) {
+        this.totalItems = totalItems;
     }
 
     public LocalDate getFromDate() {

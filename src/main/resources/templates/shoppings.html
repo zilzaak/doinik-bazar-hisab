@@ -15,6 +15,12 @@
             }
         });
 
+
+        function setOnChangeInfo(){
+            document.getElementById("pageNumber").value=1;
+            document.getElementById("pageSize").value=100;
+        }
+
         function calcInput(param) {
             var opstr=document.getElementById("calcDisplay").value;
             var result=document.getElementById("resultDisplay").value;
@@ -186,62 +192,245 @@
 
 </div>
 
-<div class="flex flex-col  sm:flex-row justify-between ">
-    <form th:object="${sform}" th:action="@{/list}" method="get">
+<div class="flex flex-col sm:flex-row justify-between">
+
+    <form th:object="${sform}"
+          th:action="@{/list}"
+          method="get"
+          class="w-full">
 
         <div class="mb-3 p-2 bg-gray-50 rounded-lg">
-            <div class="flex flex-col sm:flex-row justify-between">
 
-                <div class="flex items-center" style="padding-left: 8px;" >
-                    <span class="text-gray-700 font-medium mr-3">From :</span>
-                    <input  id="fromDate" type="date" th:field="*{fromDate}"  class="px-4 py-1 border border-gray-300 rounded-lg focus:ring-2
-                                 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+
+            <!-- =================================================
+                 FIRST ROW - SEARCH FILTERS
+                 ================================================= -->
+
+            <div class="flex flex-wrap items-center gap-4">
+
+
+                <!-- FROM DATE -->
+
+                <div class="flex items-center">
+
+                    <span class="text-gray-700 font-medium mr-3">
+                        From :
+                    </span>
+
+                    <input id="fromDate" onchange="setOnChangeInfo()"
+                           type="date"
+                           th:field="*{fromDate}"
+                           class="px-4 py-1 border border-gray-300
+                                  rounded-lg focus:ring-2
+                                  focus:ring-blue-500
+                                  focus:border-blue-500
+                                  outline-none transition">
+
                 </div>
 
-                <div class="flex items-center" style="padding-left: 8px;">
-                    <span class="text-gray-700 font-medium mr-3">To Date :</span>
-                    <input  id="toDate"  type="date" th:field="*{toDate}"  class="px-4 py-1 border border-gray-300 rounded-lg focus:ring-2
-                                 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+
+                <!-- TO DATE -->
+
+                <div class="flex items-center">
+
+                    <span class="text-gray-700 font-medium mr-3">
+                        To Date :
+                    </span>
+
+                    <input id="toDate" onchange="setOnChangeInfo()"
+                           type="date"
+                           th:field="*{toDate}"
+                           class="px-4 py-1 border border-gray-300
+                                  rounded-lg focus:ring-2
+                                  focus:ring-blue-500
+                                  focus:border-blue-500
+                                  outline-none transition">
+
                 </div>
 
-                <div class="flex items-center" style="padding-left:8px;">
-                    <span class="text-gray-700 font-medium mr-3">Item Name :</span>
-                    <input id="itemName" type="text" th:field="*{itemName}"  class="px-4 py-1 border border-gray-300 rounded-lg focus:ring-2
-                                 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+
+                <!-- ITEM NAME -->
+
+                <div class="flex items-center">
+
+                    <span class="text-gray-700 font-medium mr-3">
+                        Item Name :
+                    </span>
+
+                    <input id="itemName" onkeyup="setOnChangeInfo()"
+                           type="text"
+                           th:field="*{itemName}"
+                           class="px-4 py-1 border border-gray-300
+                                  rounded-lg focus:ring-2
+                                  focus:ring-blue-500
+                                  focus:border-blue-500
+                                  outline-none transition">
+
                 </div>
 
-                    Category
-                    <select  id="itemCat" th:field="*{itemCat}" >
-                        <option  value=""  selected > -- </option>
-                        <option value="cosmetics">cosmetics</option>
-                        <option value="costume">costume</option>
-                        <option value="vegetable">vegetable</option>
-                        <option value="oil/masala">oil/masala</option>
-                        <option value="fish/meat">fish/meat</option>
-                        <option value="fruits">fruits</option>
-                        <option value="transport">transport</option>
-                        <option value="rent/monthly-fee">rent/monthly-fee</option>
-                        <option value="others">others</option>
+
+                <!-- CATEGORY -->
+
+                <div class="flex items-center">
+
+                    <span class="text-gray-700 font-medium mr-3">
+                        Category :
+                    </span>
+
+                    <select id="itemCat" onchange="setOnChangeInfo()"
+                            th:field="*{itemCat}"
+                            class="px-3 py-1 border border-gray-300
+                                   rounded-lg">
+
+                        <option value="">--</option>
+
+                        <option value="cosmetics">
+                            cosmetics
+                        </option>
+
+                        <option value="costume">
+                            costume
+                        </option>
+
+                        <option value="vegetable">
+                            vegetable
+                        </option>
+
+                        <option value="oil/masala">
+                            oil/masala
+                        </option>
+
+                        <option value="fish/meat">
+                            fish/meat
+                        </option>
+
+                        <option value="fruits">
+                            fruits
+                        </option>
+
+                        <option value="transport">
+                            transport
+                        </option>
+
+                        <option value="rent/monthly-fee">
+                            rent/monthly-fee
+                        </option>
+
+                        <option value="others">
+                            others
+                        </option>
+
                     </select>
 
-
-<div  class="flex items-center" style="padding-left: 12px;" >
-    <button  id="search"
-             type="submit"
-             class="px-6 bg-green-300 text-white font-medium rounded-lg hover:bg-yellow-200 transition-colors duration-200">
-        Search
-    </button>
-</div>
+                </div>
 
             </div>
+
+
+            <!-- =================================================
+                 SECOND ROW - PAGINATION
+                 ================================================= -->
+
+            <div class="flex flex-wrap items-center gap-4 mt-3">
+
+
+                <!-- PAGE NUMBER -->
+
+                <div class="flex items-center">
+
+                    <span class="text-gray-700 font-medium mr-2">
+                        Page Number :
+                    </span>
+
+                    <input id="pageNumber"
+                           type="number"
+                           th:field="*{pageNumber}"
+                           min="1"
+                           class="w-24 px-2 py-1
+                                  border border-gray-300
+                                  rounded-lg focus:ring-2
+                                  focus:ring-blue-500
+                                  focus:border-blue-500
+                                  outline-none transition">
+
+                </div>
+
+
+                <!-- PAGE SIZE -->
+
+                <div class="flex items-center">
+
+                    <span class="text-gray-700 font-medium mr-2">
+                        Page Size :
+                    </span>
+
+                    <input id="pageSize"
+                           type="number"
+                           th:field="*{pageSize}"
+                           min="1"
+                           class="w-24 px-2 py-1
+                                  border border-gray-300
+                                  rounded-lg focus:ring-2
+                                  focus:ring-blue-500
+                                  focus:border-blue-500
+                                  outline-none transition">
+
+                </div>
+
+
+                <!-- TOTAL PAGES -->
+
+                <div class="flex items-center">
+
+                    <span class="text-gray-700 font-medium mr-2">
+                        Total Pages :
+                    </span>
+
+                    <input id="totalPages"
+                           type="number"
+                           readonly
+                           th:field="*{totalPages}"
+                           class="w-24 px-2 py-1
+                                  border border-gray-300
+                                  rounded-lg bg-gray-100">
+
+                </div>
+
+
+                <!-- SEARCH -->
+
+                <div class="flex items-center">
+
+                    <button id="search"
+                            type="submit"
+                            class="px-4 py-1
+                                   bg-green-500
+                                   text-white
+                                   font-medium
+                                   rounded-lg
+                                   hover:bg-green-600
+                                   transition-colors duration-200">
+
+                        Search
+
+                    </button>
+
+                </div>
+
+
+            </div>
+
         </div>
+
     </form>
+
 </div>
+
 
 <div class="container mx-auto px-4 py-3">
     <div class="text-center mb-10">
         <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
-      <b>Total Items</b>: <span class="font-medium" th:text="${response.markets.size()}"></span> <br/>
+      <b>Total Items</b>: <span class="font-medium" th:text="${sform.totalItems}"></span> <br/>
       <b>Total Price:</b>:  <span class="font-medium text-green-600" th:text="${sform.totalPrice} "></span>
         </div>
     </div>
