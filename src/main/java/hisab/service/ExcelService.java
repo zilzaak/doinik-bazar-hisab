@@ -164,6 +164,7 @@ public class ExcelService {
                    boolean itemCatMatched=true;
 
                    Market m=new Market(xid,xname,xprice,xdate);
+                   m.setItemType(xtype);
                    m.setDay(xdate.getDayOfWeek().name());
                    if(id!=null){
                        if(id.equals(xid)){
